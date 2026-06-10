@@ -54,6 +54,12 @@ const app = document.querySelector("#app");
 const railStats = document.querySelector("#railStats");
 const navItems = [...document.querySelectorAll(".nav-item")];
 
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
 function loadState() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));

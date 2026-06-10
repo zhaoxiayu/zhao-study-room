@@ -1,0 +1,19 @@
+{
+  "name": "赵四儿自习室",
+  "short_name": "赵四儿",
+  "description": "和朋友一起学习、打卡、记录目标进度。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff8fb",
+  "theme_color": "#f8f4ec",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
