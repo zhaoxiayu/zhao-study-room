@@ -370,17 +370,6 @@ function renderStudy() {
         </div>
       </section>
 
-      <div class="stat-grid">
-        <div class="stat-card">
-          <span>今日学习</span>
-          <strong>${formatMinutes(total)}</strong>
-        </div>
-        <div class="stat-card">
-          <span>连续打开</span>
-          <strong>${calcStreak()} 天</strong>
-        </div>
-      </div>
-
       <section class="form-panel start-panel" id="startPanel">
         <h3 class="section-title">开始一段学习</h3>
         <div class="mode-grid">
@@ -417,6 +406,17 @@ function renderStudy() {
           </button>
         </div>
       </section>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <span>今日学习</span>
+          <strong>${formatMinutes(total)}</strong>
+        </div>
+        <div class="stat-card">
+          <span>连续打开</span>
+          <strong>${calcStreak()} 天</strong>
+        </div>
+      </div>
     </div>
   `;
 
