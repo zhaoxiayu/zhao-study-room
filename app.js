@@ -340,13 +340,13 @@ function renderStudy() {
         ${avatarMarkup()}
       </div>
       <div class="start-copy">
-        <h1>欢迎来到赵四儿自习室</h1>
-        <p>和朋友一起安静学习，把今天认真记下来。</p>
+        <h1>不要在心上努力，行为却倦怠。</h1>
+        <p>而是反过来，心态放松，直接去做</p>
       </div>
     </section>
 
     <div class="stack">
-      <button class="primary-btn" type="button" id="openStart">
+      <button class="primary-btn start-study-btn" type="button" id="openStart">
         <i data-lucide="play"></i>
         开始学习
       </button>
@@ -370,11 +370,6 @@ function renderStudy() {
         </div>
       </section>
 
-      <blockquote class="quote-card">
-        不要在心上努力，行为却倦怠。<br />
-        而是反过来，心态放松，直接去做
-      </blockquote>
-
       <div class="stat-grid">
         <div class="stat-card">
           <span>今日学习</span>
@@ -386,7 +381,7 @@ function renderStudy() {
         </div>
       </div>
 
-      <section class="form-panel" id="startPanel" hidden>
+      <section class="form-panel start-panel" id="startPanel">
         <h3 class="section-title">开始一段学习</h3>
         <div class="mode-grid">
           <button class="mode-option ${draft.mode === "countup" ? "is-selected" : ""}" type="button" data-mode="countup">
@@ -401,7 +396,7 @@ function renderStudy() {
 
         <label class="field">
           <span>学习内容</span>
-          <textarea id="topicInput" maxlength="60" placeholder="例如：高数刷题、英语听力、Java 课程设计">${draft.topic}</textarea>
+          <textarea id="topicInput" maxlength="60">${draft.topic}</textarea>
         </label>
 
         <label class="field" id="minutesField">
@@ -431,11 +426,12 @@ function renderStudy() {
   const minutesInput = document.querySelector("#minutesInput");
 
   document.querySelector("#openStart").addEventListener("click", () => {
-    startPanel.hidden = false;
-    topicInput.focus();
+    const willOpen = !startPanel.classList.contains("is-open");
+    startPanel.classList.toggle("is-open", willOpen);
+    if (willOpen) topicInput.focus();
   });
   document.querySelector("#closeStart").addEventListener("click", () => {
-    startPanel.hidden = true;
+    startPanel.classList.remove("is-open");
   });
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -505,6 +501,10 @@ function renderTimerPage() {
           </div>
         </div>
       </div>
+
+      <p class="timer-quote">
+        任何时候不要去怀疑自己，或是羡慕别人。做好自己，全力以赴地把握好每一天，不要太计较最后的结果。这个过程只是迟早和长短而已，最终都会有属于自己的天地和展现自己价值的一天。
+      </p>
 
       <div class="timer-controls">
         <button class="ghost-btn" type="button" id="pauseSession">

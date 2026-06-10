@@ -257,9 +257,9 @@ button {
 }
 
 .start-copy h1 {
-  max-width: 280px;
+  max-width: 330px;
   margin: 0 0 8px;
-  font-size: 32px;
+  font-size: 26px;
   line-height: 1.08;
 }
 
@@ -273,8 +273,7 @@ button {
   color: rgba(255, 255, 255, 0.88);
 }
 
-.goal-card,
-.quote-card {
+.goal-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.76);
@@ -368,14 +367,6 @@ button {
   font-weight: 750;
 }
 
-.quote-card {
-  margin: 0;
-  padding: 14px 16px;
-  color: #3c4148;
-  font-weight: 800;
-  line-height: 1.65;
-}
-
 .primary-btn,
 .ghost-btn,
 .tiny-btn,
@@ -398,6 +389,17 @@ button {
   color: #fff;
   font-weight: 800;
   box-shadow: 0 14px 30px rgba(201, 79, 121, 0.22);
+}
+
+.start-study-btn {
+  min-height: 68px;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.start-study-btn svg {
+  width: 26px;
+  height: 26px;
 }
 
 .primary-btn:hover,
@@ -475,6 +477,29 @@ button {
 .profile-panel,
 .record-card {
   padding: 16px;
+}
+
+.start-panel {
+  max-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+  transform-origin: top center;
+  transition:
+    max-height 0.34s ease,
+    padding 0.34s ease,
+    opacity 0.24s ease,
+    transform 0.28s ease;
+}
+
+.start-panel.is-open {
+  max-height: 760px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .section-title {
@@ -612,6 +637,18 @@ button {
 
 .timer-controls button {
   width: 100%;
+}
+
+.timer-quote {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff7fa, #effaf3);
+  color: #4d535c;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.75;
 }
 
 .record-summary {
