@@ -39,11 +39,12 @@ const navItems = [...document.querySelectorAll(".nav-item")];
 function loadState() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    const storedUser = { ...(stored?.user || {}), avatar: "", background: "" };
     return {
       ...defaultState,
       ...stored,
       activeTab: "study",
-      user: { ...defaultState.user, ...(stored?.user || {}) },
+      user: { ...defaultState.user, ...storedUser },
       friends: Array.isArray(stored?.friends) ? stored.friends : [],
     };
   } catch {
@@ -52,7 +53,20 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const slimState = {
+    ...state,
+    user: {
+      ...state.user,
+      avatar: "",
+      background: "",
+    },
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(slimState));
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeTab: "study", user: slimState.user }));
+  }
 }
 
 async function api(path, options = {}) {
@@ -937,7 +951,7 @@ function readImage(event, key) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = async () => {
-    state.user[key] = reader.result;
+    state.user[key] = await resizeImage(reader.result, key === "avatar" ? 360 : 1200);
     if (state.user.phone) {
       try {
         const data = await api("/api/profile", {
@@ -960,6 +974,23 @@ function readImage(event, key) {
     render();
   };
   reader.readAsDataURL(file);
+}
+
+function resizeImage(dataUrl, maxSize) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      const context = canvas.getContext("2d");
+      context.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
 }
 
 function renderRail() {
