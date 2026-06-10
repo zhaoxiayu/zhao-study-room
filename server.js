@@ -11,6 +11,13 @@ const REQUESTED_DATA_DIR = process.env.DATA_DIR || DEFAULT_DATA_DIR;
 let activeDataDir = REQUESTED_DATA_DIR;
 let warnedDataFallback = false;
 
+const NICKNAME_BY_PHONE = {
+  "15936073448": "考研的五一",
+  "15939434458": "专升本的even",
+  "13598570552": "考公的锤捶",
+  "19538515421": "努力的晓",
+};
+
 const mime = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -88,21 +95,38 @@ function cleanName(value, fallback = "自习生") {
   return (text || fallback).slice(0, 12);
 }
 
+function mappedNickname(phone, fallback) {
+  return NICKNAME_BY_PHONE[phone] || cleanName(fallback);
+}
+
+function cleanGoal(value) {
+  return String(value || "").trim().slice(0, 28);
+}
+
+function cleanGoalMinutes(value) {
+  return Math.max(15, Math.min(1440, Math.floor(Number(value) || 480)));
+}
+
 function ensureUser(db, phone, name) {
+  const displayName = mappedNickname(phone, name);
   if (!db.users[phone]) {
     db.users[phone] = {
       phone,
-      name: cleanName(name),
+      name: displayName,
       avatar: "",
       background: "",
+      goalText: "",
+      dailyGoalMinutes: 480,
       joinedAt: new Date().toISOString(),
       openDays: [],
       records: [],
       friends: [],
     };
-  } else if (name) {
-    db.users[phone].name = cleanName(name);
+  } else if (name || NICKNAME_BY_PHONE[phone]) {
+    db.users[phone].name = displayName;
   }
+  db.users[phone].goalText ||= "";
+  db.users[phone].dailyGoalMinutes = cleanGoalMinutes(db.users[phone].dailyGoalMinutes);
   db.users[phone].openDays ||= [];
   db.users[phone].records ||= [];
   db.users[phone].friends ||= [];
@@ -185,6 +209,8 @@ function userState(db, user) {
       name: user.name,
       avatar: user.avatar || "",
       background: user.background || "",
+      goalText: user.goalText || "",
+      dailyGoalMinutes: cleanGoalMinutes(user.dailyGoalMinutes),
       joinedAt: user.joinedAt,
     },
     openDays: user.openDays || [],
@@ -236,9 +262,11 @@ async function handleApi(req, res, url) {
   }
 
   if (url.pathname === "/api/profile" && req.method === "PUT") {
-    user.name = cleanName(body.name);
+    user.name = mappedNickname(phone, body.name);
     user.avatar = String(body.avatar || "");
     user.background = String(body.background || "");
+    user.goalText = cleanGoal(body.goalText);
+    user.dailyGoalMinutes = cleanGoalMinutes(body.dailyGoalMinutes);
     await saveDb(db);
     return send(res, 200, userState(db, user));
   }

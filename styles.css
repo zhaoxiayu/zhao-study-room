@@ -144,8 +144,66 @@ button {
   color: #fff;
   background:
     linear-gradient(180deg, rgba(19, 31, 28, 0.18), rgba(18, 24, 29, 0.62)),
-    var(--user-bg, url("./assets/study-bg.png")) center / cover;
+    var(--home-cover, url("./assets/study-bg.png")) center / cover;
   overflow: hidden;
+}
+
+.login-gate {
+  min-height: calc(100svh - 44px);
+  display: grid;
+  align-content: center;
+  gap: 16px;
+}
+
+.login-cover {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 24px;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(25, 30, 35, 0.12), rgba(20, 24, 27, 0.68)),
+    var(--home-cover, url("./assets/study-bg.png")) center / cover;
+}
+
+.login-cover h1 {
+  max-width: 310px;
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.08;
+}
+
+.login-cover p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.login-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.nickname-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff1f6, #eaf9ef);
+}
+
+.nickname-preview span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.nickname-preview strong {
+  overflow-wrap: anywhere;
 }
 
 .top-row,
@@ -213,6 +271,109 @@ button {
 
 .hero .start-copy p {
   color: rgba(255, 255, 255, 0.88);
+}
+
+.goal-card,
+.quote-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.goal-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.goal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.goal-head span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.goal-head strong {
+  font-size: 22px;
+}
+
+.goal-head p {
+  max-width: 46%;
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.semi-meter {
+  position: relative;
+  min-height: 116px;
+  display: grid;
+  place-items: center;
+}
+
+.semi-meter svg {
+  width: min(100%, 260px);
+  height: 118px;
+}
+
+.meter-track,
+.meter-fill {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 18;
+}
+
+.meter-track {
+  stroke: #f2dfe7;
+}
+
+.meter-fill {
+  stroke: var(--green);
+}
+
+.meter-center {
+  position: absolute;
+  inset: 42px 0 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  color: var(--ink);
+}
+
+.meter-center svg {
+  width: 24px;
+  height: 24px;
+  color: var(--green-dark);
+}
+
+.meter-center strong {
+  font-size: 24px;
+}
+
+.meter-center span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.quote-card {
+  margin: 0;
+  padding: 14px 16px;
+  color: #3c4148;
+  font-weight: 800;
+  line-height: 1.65;
 }
 
 .primary-btn,
@@ -798,5 +959,14 @@ button {
 
   .timer-controls {
     grid-template-columns: 1fr;
+  }
+
+  .goal-head {
+    display: grid;
+  }
+
+  .goal-head p {
+    max-width: none;
+    text-align: left;
   }
 }

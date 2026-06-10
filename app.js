@@ -3,6 +3,21 @@ const LAST_PHONE_KEY = "zhaosier-last-phone";
 const LEGACY_LAST_PHONE_KEY = "zaoxiayu-last-phone";
 const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:5180" : "";
 const COLORS = ["#48b884", "#f38daf", "#8ddfc0", "#f6b1c8", "#5a8ddf", "#e7a84c"];
+const NICKNAME_BY_PHONE = {
+  "15936073448": "考研的五一",
+  "15939434458": "专升本的even",
+  "13598570552": "考公的锤捶",
+  "19538515421": "努力的晓",
+};
+const COVER_IMAGES = [
+  "CE5C6D9B23D690CD33891D941816579E.jpg",
+  "6F2CC1A53948F44F53EA01BB19E2D993.jpg",
+  "CA1F544C27C9BBD9F3C0F685871B47B9.jpg",
+  "3A15FF55E097B5A4AD148281A4B4E790.jpg",
+  "FAAEB24C7CB726F202E92665AACB126E.jpg",
+  "63440D98AC92318135022C3F98507427.jpg",
+  "E4693D9C0027F813B1DB55C593E83A6C.jpg",
+];
 
 const defaultState = {
   activeTab: "study",
@@ -11,6 +26,8 @@ const defaultState = {
     name: "自习生",
     avatar: "",
     background: "",
+    goalText: "",
+    dailyGoalMinutes: 480,
     joinedAt: "",
   },
   openDays: [],
@@ -31,6 +48,7 @@ let draft = {
 };
 let session = null;
 let timer = null;
+let coverIndex = Math.floor(Date.now() / 10000) % COVER_IMAGES.length;
 
 const app = document.querySelector("#app");
 const railStats = document.querySelector("#railStats");
@@ -92,6 +110,10 @@ function applyServerState(data) {
   };
   localStorage.setItem(LAST_PHONE_KEY, state.user.phone || "");
   saveState();
+}
+
+function nicknameForPhone(phone) {
+  return NICKNAME_BY_PHONE[String(phone || "").replace(/\D/g, "")] || "";
 }
 
 async function syncFromServer(phone = state.user.phone) {
@@ -231,11 +253,21 @@ function setUserBackgroundVar() {
   document.documentElement.style.setProperty("--user-bg", background);
 }
 
+function setHomeCoverVar() {
+  const file = COVER_IMAGES[coverIndex % COVER_IMAGES.length];
+  document.documentElement.style.setProperty("--home-cover", `url("./assets/covers/${file}")`);
+}
+
 function render() {
   setUserBackgroundVar();
+  setHomeCoverVar();
+  const needsLogin = !state.user.phone && !session;
+  document.querySelector(".bottom-nav").hidden = needsLogin;
   navItems.forEach((item) => item.classList.toggle("is-active", item.dataset.tab === state.activeTab));
 
-  if (session) {
+  if (needsLogin) {
+    renderLoginGate();
+  } else if (session) {
     renderTimerPage();
   } else if (state.activeTab === "study") {
     renderStudy();
@@ -253,9 +285,51 @@ function refreshIcons() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+function renderLoginGate() {
+  app.innerHTML = `
+    <section class="login-gate">
+      <div class="login-cover">
+        <p class="kicker">赵四儿自习室</p>
+        <h1>先进入你的自习座位</h1>
+        <p>输入手机号后会自动生成昵称，之后打开就直接进入主页。</p>
+      </div>
+
+      <section class="profile-panel login-panel">
+        <h3 class="section-title">登录账号</h3>
+        <label class="field">
+          <span>手机号</span>
+          <input id="gatePhoneInput" inputmode="numeric" maxlength="11" placeholder="请输入手机号" />
+        </label>
+        <div class="nickname-preview">
+          <span>对应昵称</span>
+          <strong id="gateNickname">输入手机号后生成</strong>
+        </div>
+        <button class="primary-btn" type="button" id="gateLoginBtn">
+          <i data-lucide="log-in"></i>
+          进入自习室
+        </button>
+      </section>
+    </section>
+  `;
+
+  const phoneInput = document.querySelector("#gatePhoneInput");
+  const nickname = document.querySelector("#gateNickname");
+  phoneInput.addEventListener("input", () => {
+    const mapped = nicknameForPhone(phoneInput.value);
+    nickname.textContent = mapped || "未匹配昵称";
+  });
+  document.querySelector("#gateLoginBtn").addEventListener("click", () => loginWithPhone(phoneInput.value));
+}
+
 function renderStudy() {
   const todayRecords = getTodayRecords();
   const total = totalSeconds(todayRecords);
+  const goalMinutes = Number(state.user.dailyGoalMinutes) || 480;
+  const goalSeconds = goalMinutes * 60;
+  const goalRatio = Math.min(1, total / goalSeconds);
+  const isGoalDone = total >= goalSeconds;
+  const arcLength = 251;
+  const arcProgress = Math.max(0, Math.min(arcLength, goalRatio * arcLength));
   app.innerHTML = `
     <section class="hero">
       <div class="top-row">
@@ -276,6 +350,30 @@ function renderStudy() {
         <i data-lucide="play"></i>
         开始学习
       </button>
+
+      <section class="goal-card">
+        <div class="goal-head">
+          <div>
+            <span>目标学习时长</span>
+            <strong>${formatMinutes(goalSeconds)}</strong>
+          </div>
+          <p>${escapeHtml(state.user.goalText || "今日专注")}</p>
+        </div>
+        <div class="semi-meter">
+          <svg viewBox="0 0 200 112" aria-label="今日目标进度">
+            <path d="M 20 96 A 80 80 0 0 1 180 96" class="meter-track"></path>
+            <path d="M 20 96 A 80 80 0 0 1 180 96" class="meter-fill" style="stroke-dasharray: ${arcProgress} ${arcLength};"></path>
+          </svg>
+          <div class="meter-center">
+            ${isGoalDone ? `<i data-lucide="check"></i><strong>已完成！</strong>` : `<strong>${Math.round(goalRatio * 100)}%</strong><span>${formatMinutes(total)} / ${formatMinutes(goalSeconds)}</span>`}
+          </div>
+        </div>
+      </section>
+
+      <blockquote class="quote-card">
+        不要在心上努力，行为却倦怠。<br />
+        而是反过来，心态放松，直接去做
+      </blockquote>
 
       <div class="stat-grid">
         <div class="stat-card">
@@ -852,11 +950,21 @@ function renderProfile() {
         <h3 class="section-title">${isLoggedIn ? "账号资料" : "登录账号"}</h3>
         <label class="field">
           <span>手机号</span>
-          <input id="phoneInput" inputmode="numeric" maxlength="11" placeholder="请输入 11 位手机号" value="${state.user.phone}" />
+          <input id="phoneInput" inputmode="numeric" maxlength="11" placeholder="请输入 11 位手机号" value="${state.user.phone}" ${isLoggedIn ? "readonly" : ""} />
         </label>
         <label class="field">
           <span>昵称</span>
-          <input id="nameInput" maxlength="12" placeholder="例如：小青" value="${escapeAttr(state.user.name)}" />
+          <input id="nameInput" maxlength="12" placeholder="输入手机号后自动生成" value="${escapeAttr(state.user.name)}" readonly />
+        </label>
+        <label class="field">
+          <span>目标</span>
+          <input id="goalTextInput" maxlength="28" placeholder="例如：考研数学一轮复习" value="${escapeAttr(state.user.goalText || "")}" />
+        </label>
+        <label class="field">
+          <span>每日目标学习时长</span>
+          <select id="dailyGoalInput">
+            ${[120, 180, 240, 300, 360, 480, 600, 720].map((n) => `<option value="${n}" ${Number(state.user.dailyGoalMinutes || 480) === n ? "selected" : ""}>${formatMinutes(n * 60)}</option>`).join("")}
+          </select>
         </label>
         <div class="form-actions">
           <button class="primary-btn" type="button" id="loginBtn">
@@ -906,6 +1014,10 @@ function renderProfile() {
   `;
 
   document.querySelector("#loginBtn").addEventListener("click", saveProfile);
+  const phoneInput = document.querySelector("#phoneInput");
+  phoneInput.addEventListener("input", () => {
+    document.querySelector("#nameInput").value = nicknameForPhone(phoneInput.value) || "";
+  });
   document.querySelector("#avatarInput").addEventListener("change", (event) => readImage(event, "avatar"));
   document.querySelector("#bgInput").addEventListener("change", (event) => readImage(event, "background"));
   const logout = document.querySelector("#logoutBtn");
@@ -914,16 +1026,30 @@ function renderProfile() {
 
 async function saveProfile() {
   const phone = document.querySelector("#phoneInput").value.trim();
-  const name = document.querySelector("#nameInput").value.trim() || "自习生";
+  const name = nicknameForPhone(phone) || document.querySelector("#nameInput").value.trim() || "自习生";
+  const goalText = document.querySelector("#goalTextInput").value.trim();
+  const dailyGoalMinutes = Number(document.querySelector("#dailyGoalInput").value) || 480;
   if (!/^1[3-9]\d{9}$/.test(phone)) {
     alert("请输入正确的 11 位手机号");
     return;
   }
   try {
-    const data = await api("/api/login", {
-      method: "POST",
-      body: JSON.stringify({ phone, name }),
-    });
+    const data = state.user.phone
+      ? await api("/api/profile", {
+          method: "PUT",
+          body: JSON.stringify({
+            phone,
+            name,
+            avatar: state.user.avatar,
+            background: state.user.background,
+            goalText,
+            dailyGoalMinutes,
+          }),
+        })
+      : await api("/api/login", {
+          method: "POST",
+          body: JSON.stringify({ phone, name }),
+        });
     applyServerState(data);
   } catch (error) {
     alert(error.message);
@@ -934,6 +1060,31 @@ async function saveProfile() {
     saveState();
   }
   render();
+}
+
+async function loginWithPhone(phone) {
+  const clean = String(phone || "").replace(/\D/g, "");
+  const name = nicknameForPhone(clean);
+  if (!/^1[3-9]\d{9}$/.test(clean)) {
+    alert("请输入正确的 11 位手机号");
+    return;
+  }
+  if (!name) {
+    alert("这个手机号暂未分配昵称");
+    return;
+  }
+  try {
+    const data = await api("/api/login", {
+      method: "POST",
+      body: JSON.stringify({ phone: clean, name }),
+    });
+    applyServerState(data);
+    state.activeTab = "study";
+    saveState();
+    render();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function logoutProfile() {
@@ -961,6 +1112,8 @@ function readImage(event, key) {
             name: state.user.name,
             avatar: state.user.avatar,
             background: state.user.background,
+            goalText: state.user.goalText,
+            dailyGoalMinutes: state.user.dailyGoalMinutes,
           }),
         });
         applyServerState(data);
@@ -1049,6 +1202,10 @@ async function init() {
     addOpenDay();
   }
   render();
+  setInterval(() => {
+    coverIndex = (coverIndex + 1) % COVER_IMAGES.length;
+    setHomeCoverVar();
+  }, 9000);
 }
 
 init();
