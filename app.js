@@ -93,6 +93,19 @@ async function syncFromServer(phone = state.user.phone) {
   }
 }
 
+async function checkServerOnline() {
+  try {
+    await api("/api/health");
+    state.serverOnline = true;
+    saveState();
+    return true;
+  } catch {
+    state.serverOnline = false;
+    saveState();
+    return false;
+  }
+}
+
 function isSeedRecord(item) {
   const seedTopics = new Set(["英语听力", "高数刷题", "Java 课程设计"]);
   const seedDurations = new Set([32 * 60, 48 * 60, 64 * 60]);
@@ -995,6 +1008,7 @@ navItems.forEach((item) => {
 });
 
 async function init() {
+  await checkServerOnline();
   const lastPhone = localStorage.getItem(LAST_PHONE_KEY) || localStorage.getItem(LEGACY_LAST_PHONE_KEY) || state.user.phone;
   if (lastPhone) {
     state.user.phone = lastPhone;
