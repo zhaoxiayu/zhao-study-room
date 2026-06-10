@@ -1,11 +1,13 @@
-const CACHE_NAME = "zhao-study-room-v1";
+const CACHE_NAME = "zhao-study-room-v2";
 const CORE_ASSETS = [
   "/",
   "/index.html",
   "/styles.css",
   "/app.js",
   "/manifest.webmanifest",
-  "/assets/app-icon.svg"
+  "/assets/app-icon-192.png",
+  "/assets/app-icon-512.png",
+  "/assets/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", (event) => {
