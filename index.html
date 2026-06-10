@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f8f4ec" />
+    <title>赵四儿自习室</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-bg" aria-hidden="true"></div>
+    <main class="app-frame">
+      <section class="phone-shell" aria-label="学习应用">
+        <div id="app" class="app"></div>
+        <nav class="bottom-nav" aria-label="主要导航">
+          <button class="nav-item is-active" type="button" data-tab="study">
+            <i data-lucide="timer"></i>
+            <span>学习</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="records">
+            <i data-lucide="pie-chart"></i>
+            <span>记录</span>
+          </button>
+          <button class="nav-item" type="button" data-tab="profile">
+            <i data-lucide="user-round"></i>
+            <span>我的</span>
+          </button>
+        </nav>
+      </section>
+
+      <aside class="desktop-rail" aria-label="桌面学习概览">
+        <div class="rail-head">
+          <p>Study Room</p>
+          <h1>赵四儿自习室</h1>
+        </div>
+        <div id="railStats" class="rail-stats"></div>
+      </aside>
+    </main>
+  </body>
+</html>
