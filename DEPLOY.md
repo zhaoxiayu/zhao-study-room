@@ -15,7 +15,9 @@ http://127.0.0.1:5180
 ## 环境变量
 
 - `PORT`: 服务端口，云平台通常会自动提供。
-- `DATA_DIR`: 数据保存目录。部署到云平台时建议设置到持久磁盘目录。
+- `DATA_DIR`: 数据保存目录。没有挂载持久磁盘时可以不设置；挂载 Render Disk 后再设置到磁盘目录。
+
+Render 免费测试时可以先不设置 `DATA_DIR`。如果已经设置了 `DATA_DIR=/var/data` 但没有添加 Disk，会出现 `EACCES: permission denied, mkdir '/var/data'`。
 
 ## VPS 云服务器运行
 

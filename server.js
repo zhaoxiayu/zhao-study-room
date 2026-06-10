@@ -6,8 +6,10 @@ import { randomUUID } from "node:crypto";
 
 const PORT = Number(process.env.PORT || 5180);
 const ROOT = new URL(".", import.meta.url).pathname;
-const DATA_DIR = process.env.DATA_DIR || join(ROOT, "data");
-const DB_FILE = join(DATA_DIR, "db.json");
+const DEFAULT_DATA_DIR = join(ROOT, "data");
+const REQUESTED_DATA_DIR = process.env.DATA_DIR || DEFAULT_DATA_DIR;
+let activeDataDir = REQUESTED_DATA_DIR;
+let warnedDataFallback = false;
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -21,17 +23,39 @@ const mime = {
   ".svg": "image/svg+xml",
 };
 
+function dbFile() {
+  return join(activeDataDir, "db.json");
+}
+
+async function ensureDataDir() {
+  try {
+    await mkdir(activeDataDir, { recursive: true });
+  } catch (error) {
+    if (activeDataDir !== DEFAULT_DATA_DIR) {
+      activeDataDir = DEFAULT_DATA_DIR;
+      if (!warnedDataFallback) {
+        warnedDataFallback = true;
+        console.warn(`数据目录 ${REQUESTED_DATA_DIR} 不可写，已临时切换到 ${DEFAULT_DATA_DIR}`);
+      }
+      await mkdir(activeDataDir, { recursive: true });
+      return;
+    }
+    throw error;
+  }
+}
+
 async function loadDb() {
   try {
-    return JSON.parse(await readFile(DB_FILE, "utf8"));
+    await ensureDataDir();
+    return JSON.parse(await readFile(dbFile(), "utf8"));
   } catch {
     return { users: {} };
   }
 }
 
 async function saveDb(db) {
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(DB_FILE, JSON.stringify(db, null, 2));
+  await ensureDataDir();
+  await writeFile(dbFile(), JSON.stringify(db, null, 2));
 }
 
 function send(res, status, data) {
